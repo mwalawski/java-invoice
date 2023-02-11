@@ -19,7 +19,7 @@ public abstract class Product {
         if(price == null){
             throw new IllegalArgumentException();
         }
-        if(price.doubleValue() < 0){
+        if(price.compareTo(BigDecimal.ZERO) == -1){
             throw new IllegalArgumentException();
         }
 
