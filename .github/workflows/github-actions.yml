@@ -13,3 +13,5 @@ jobs:
           distribution: 'adopt'
       - name: Test
         run: mvn test
+      - name: Static Analysis
+        rum:  mvn checkstyle:check
