@@ -17,6 +17,7 @@ jobs:
         run:  mvn checkstyle:check
   matrix:
     strategy:
+      runs-on: ubuntu-latest
       matrix:
         version: [ 8, 13, 15 ]
     steps:
