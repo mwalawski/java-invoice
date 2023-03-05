@@ -16,8 +16,8 @@ jobs:
       - name: Static Analysis
         run:  mvn checkstyle:check
   matrix:
+    runs-on: ubuntu-latest
     strategy:
-      runs-on: ubuntu-latest
       matrix:
         version: [ 8, 13, 15 ]
     steps:
