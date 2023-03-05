@@ -15,7 +15,8 @@ public abstract class Product {
                 || name.equals("")
                 || price == null
                 || tax == null
-                || tax.compareTo(new BigDecimal(0)) <
+                || tax.compareTo(new BigDecimal(0))
+                        <
                         0
                         || price.compareTo(new BigDecimal(0)) < 0) {
             throw new IllegalArgumentException();
