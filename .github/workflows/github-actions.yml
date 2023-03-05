@@ -4,6 +4,9 @@ jobs:
   test:
     name: Unit tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [ 8, 13, 15 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
@@ -15,12 +18,6 @@ jobs:
         run: mvn test
       - name: Static Analysis
         run:  mvn checkstyle:check
-  matrix:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: [ 8, 13, 15 ]
-    steps:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.version }}
