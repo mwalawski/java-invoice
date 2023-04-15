@@ -1,24 +1,28 @@
 package pl.edu.agh.mwo.invoice;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import pl.edu.agh.mwo.invoice.Invoice;
-import pl.edu.agh.mwo.invoice.product.DairyProduct;
-import pl.edu.agh.mwo.invoice.product.OtherProduct;
-import pl.edu.agh.mwo.invoice.product.Product;
-import pl.edu.agh.mwo.invoice.product.TaxFreeProduct;
+import pl.edu.agh.mwo.invoice.product.*;
 
 public class InvoiceTest {
     private Invoice invoice;
+    private PrintStream standardOut = System.out;
+    private ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
 
     @Before
     public void createEmptyInvoiceForTheTest() {
         invoice = new Invoice();
+    }
+    @Before
+    public void setUpStream() {
+        System.setOut(new PrintStream(outputStreamCaptor));
     }
 
     @Test
@@ -34,6 +38,21 @@ public class InvoiceTest {
     @Test
     public void testEmptyInvoiceHasEmptyTotal() {
         Assert.assertThat(BigDecimal.ZERO, Matchers.comparesEqualTo(invoice.getGrossTotal()));
+    }
+
+    @Test
+    public void testInvoiceHasNumber() {
+        Assert.assertThat(invoice.getNumber(), Matchers.instanceOf(int.class));
+    }
+
+    @Test
+    public void testInvoiceNumberIsBiggerThanZero() {
+        Assert.assertThat(invoice.getNumber(), Matchers.greaterThanOrEqualTo(1));
+    }
+
+    @Test
+    public void testInvoiceNumberIsLessOrEqualTenThousand() {
+        Assert.assertThat(invoice.getNumber(), Matchers.lessThanOrEqualTo(10000));
     }
 
     @Test
@@ -124,5 +143,140 @@ public class InvoiceTest {
     @Test(expected = IllegalArgumentException.class)
     public void testAddingNullProduct() {
         invoice.addProduct(null);
+    }
+
+    @Test
+    public void testPrintingEmptyInvoiceInvoiceNumber() {
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[0], Matchers.containsString("Numer faktury:"));
+    }
+
+    @Test
+    public void testPrintingEmptyInvoiceProductCount() {
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[1], Matchers.comparesEqualTo("Liczba pozycji: 0"));
+    }
+
+    @Test
+    public void testPrintingOneProductInvoiceNumber() {
+        invoice.addProduct(new OtherProduct("Chlebek tostowy", new BigDecimal("3.15")), 2);
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[0], Matchers.containsString("Numer faktury:"));
+    }
+
+    @Test
+    public void testPrintingOneProductListProduct() {
+        invoice.addProduct(new OtherProduct("Kopytko", new BigDecimal("7.77")), 7);
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[1], Matchers.comparesEqualTo("Kopytko 7 7.77"));
+    }
+
+    @Test
+    public void testPrintingOneProductCount() {
+        invoice.addProduct(new OtherProduct("Masełko", new BigDecimal("5.00")), 4);
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[2], Matchers.comparesEqualTo("Liczba pozycji: 1"));
+    }
+
+    @Test
+    public void testPrintingTwoTheSameProductsSamePriceListProduct() {
+        OtherProduct sampleProduct = new OtherProduct("Kopytko", new BigDecimal("7.77"));
+        invoice.addProduct(sampleProduct, 7);
+        invoice.addProduct(sampleProduct, 5);
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[1], Matchers.comparesEqualTo("Kopytko 12 7.77"));
+    }
+
+    @Test
+    public void testPrintingTwoTheSameProductsSamePriceProductCount() {
+        OtherProduct sampleProduct = new OtherProduct("Makaron", new BigDecimal("3.23"));
+        invoice.addProduct(sampleProduct, 2);
+        invoice.addProduct(sampleProduct, 4);
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[2], Matchers.comparesEqualTo("Liczba pozycji: 1"));
+    }
+
+    @Test
+    public void testPrintingTwoTheSameProductsSamePriceOtherInstancesListProduct() {
+        invoice.addProduct(new OtherProduct("Zupka chinska", new BigDecimal("1.50")), 5);
+        invoice.addProduct(new OtherProduct("Zupka chinska", new BigDecimal("1.50")), 1);
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[1], Matchers.comparesEqualTo("Zupka chinska 1 1.50"));
+        Assert.assertThat(outputLines[2], Matchers.comparesEqualTo("Zupka chinska 5 1.50"));
+    }
+
+    @Test
+    public void testPrintingTwoTheSameProductsSamePriceOtherInstancesProductCount() {
+        invoice.addProduct(new OtherProduct("Soczek", new BigDecimal("4.52")), 3);
+        invoice.addProduct(new OtherProduct("Soczek", new BigDecimal("4.52")), 7);
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[3], Matchers.comparesEqualTo("Liczba pozycji: 2"));
+    }
+
+    @Test
+    public void testPrintingMultipleProductsListProducts() {
+        invoice.addProduct(new OtherProduct("Szyneczka", new BigDecimal("3.15")), 5);
+        invoice.addProduct(new DairyProduct("Serek", new BigDecimal("2.33")), 2);
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[1], Matchers.containsString("Szyneczka 5 3.15"));
+        Assert.assertThat(outputLines[2], Matchers.containsString("Serek 2 2.33"));
+    }
+
+
+    @Test
+    public void testPrintingMultipleProductsCount() {
+        invoice.addProduct(new OtherProduct("Ketchup", new BigDecimal("6.66")), 1);
+        invoice.addProduct(new DairyProduct("Majonez", new BigDecimal("7.22")), 2);
+        invoice.printProducts();
+        String[] outputLines = outputStreamCaptor.toString()
+                .trim()
+                .split(System.getProperty("line.separator"));
+
+        Assert.assertThat(outputLines[3], Matchers.comparesEqualTo("Liczba pozycji: 2"));
+    }
+
+    @After
+    public void tearDown() {
+        System.setOut(standardOut);
     }
 }

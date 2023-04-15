@@ -3,11 +3,19 @@ package pl.edu.agh.mwo.invoice;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import pl.edu.agh.mwo.invoice.product.Product;
 
 public class Invoice {
+    private int number;
     private Map<Product, Integer> products = new HashMap<Product, Integer>();
+
+
+    public Invoice(){
+        Random random = new Random();
+        this.number = random.nextInt(9999) + 1;
+    }
 
     public void addProduct(Product product) {
         addProduct(product, 1);
@@ -17,7 +25,14 @@ public class Invoice {
         if (product == null || quantity <= 0) {
             throw new IllegalArgumentException();
         }
+        if (products.keySet().contains(product)){
+            quantity += products.get(product);
+        }
         products.put(product, quantity);
+    }
+
+    public int getNumber() {
+        return number;
     }
 
     public BigDecimal getNetTotal() {
@@ -40,5 +55,13 @@ public class Invoice {
             totalGross = totalGross.add(product.getPriceWithTax().multiply(quantity));
         }
         return totalGross;
+    }
+
+    public void printProducts(){
+        System.out.println("Numer faktury: " + getNumber());
+        for (Product product:products.keySet()){
+            System.out.println(product.getName() + " " + products.get(product) + " " + product.getPrice());
+        }
+        System.out.println("Liczba pozycji: " + products.keySet().size());
     }
 }
