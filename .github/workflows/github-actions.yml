@@ -2,7 +2,7 @@ name: CI for Java Invoice
 on: [push]
 jobs:
   test:
-    name: Unit tests
+    name: Unit tests on JDK ${{ matrix.version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
