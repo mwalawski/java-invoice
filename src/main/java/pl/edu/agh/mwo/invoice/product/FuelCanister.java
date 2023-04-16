@@ -15,8 +15,8 @@ public class FuelCanister extends ExciseProduct {
     @Override
     public BigDecimal getPriceWithTax() {
         LocalDate currentDate = DATE;
-        if (currentDate.getMonthValue() == motherInLawMonth &&
-                currentDate.getDayOfMonth() == motherInLawDay) {
+        if (currentDate.getMonthValue() == motherInLawMonth
+                && currentDate.getDayOfMonth() == motherInLawDay) {
             this.excise = BigDecimal.ZERO;
 
         }
