@@ -8,13 +8,13 @@ import java.util.Random;
 import pl.edu.agh.mwo.invoice.product.Product;
 
 public class Invoice {
-    private final int MAX_INVOICE_NUMBER = 9999;
+    private final int maxInvoiceNumber = 9999;
     private int number;
     private Map<Product, Integer> products = new HashMap<Product, Integer>();
 
     public Invoice() {
         Random random = new Random();
-        this.number = random.nextInt(MAX_INVOICE_NUMBER) + 1;
+        this.number = random.nextInt(maxInvoiceNumber) + 1;
     }
 
     public void addProduct(Product product) {
